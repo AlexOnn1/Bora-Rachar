@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { DS } from '@/constants/design';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
 
@@ -8,15 +9,17 @@ interface CustomButtonProps {
   variant?: Variant;
   disabled?: boolean;
   loading?: boolean;
-  fullWidth?: boolean;
+  icon?: string;
   style?: ViewStyle;
 }
 
-const COLORS = {
-  primary: { bg: '#1B5E20', text: '#FFFFFF', border: '#1B5E20', pressed: '#2E7D32' },
-  secondary: { bg: '#FFFFFF', text: '#1B5E20', border: '#1B5E20', pressed: '#F1F8E9' },
-  danger: { bg: '#B71C1C', text: '#FFFFFF', border: '#B71C1C', pressed: '#C62828' },
-  ghost: { bg: 'transparent', text: '#FFFFFF', border: '#FFFFFF', pressed: 'rgba(255,255,255,0.1)' },
+const CONFIG: Record<Variant, {
+  bg: string; text: string; border: string; shadow: string;
+}> = {
+  primary:   { bg: DS.color.green700,  text: '#FFFFFF',        border: DS.color.green500,  shadow: '#0D3B0D' },
+  secondary: { bg: 'transparent',      text: DS.color.green300, border: DS.color.green700,  shadow: 'transparent' },
+  danger:    { bg: '#7F1212',          text: '#FFFFFF',        border: '#B71C1C',           shadow: '#3B0D0D' },
+  ghost:     { bg: 'rgba(46,125,50,0.12)', text: DS.color.green300, border: 'rgba(46,125,50,0.3)', shadow: 'transparent' },
 };
 
 export function CustomButton({
@@ -25,49 +28,87 @@ export function CustomButton({
   variant = 'primary',
   disabled = false,
   loading = false,
-  fullWidth = true,
+  icon,
   style,
 }: CustomButtonProps) {
-  const colors = COLORS[variant];
+  const c = CONFIG[variant];
 
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
       style={({ pressed }) => [
-        styles.button,
-        {
-          backgroundColor: pressed ? colors.pressed : colors.bg,
-          borderColor: colors.border,
-          opacity: disabled ? 0.5 : 1,
-          alignSelf: fullWidth ? 'stretch' : 'auto',
-        },
+        styles.outer,
+        { shadowColor: c.shadow, opacity: disabled ? 0.4 : 1 },
+        pressed && styles.pressed,
         style,
       ]}
     >
-      {loading ? (
-        <ActivityIndicator color={colors.text} size="small" />
-      ) : (
-        <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-      )}
+      {/* Sombra inferior (efeito 3D) */}
+      <View style={[styles.shadow, { backgroundColor: c.shadow }]} />
+
+      {/* Corpo do botão */}
+      <View
+        style={[
+          styles.body,
+          {
+            backgroundColor: c.bg,
+            borderColor: c.border,
+          },
+        ]}
+      >
+        {loading ? (
+          <ActivityIndicator color={c.text} size="small" />
+        ) : (
+          <View style={styles.row}>
+            {icon && <Text style={[styles.icon, { color: c.text }]}>{icon}</Text>}
+            <Text style={[styles.label, { color: c.text }]}>{label}</Text>
+          </View>
+        )}
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    borderWidth: 2,
+  outer: {
+    width: '100%',
+    marginBottom: 4,
+  },
+  pressed: {
+    transform: [{ translateY: 3 }],
+  },
+  shadow: {
+    position: 'absolute',
+    bottom: -4,
+    left: 2,
+    right: 2,
+    height: '100%',
+    borderRadius: DS.radius.md,
+    zIndex: 0,
+  },
+  body: {
+    borderRadius: DS.radius.md,
+    borderWidth: 1.5,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 52,
+    minHeight: 56,
+    zIndex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  icon: {
+    fontSize: 18,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+    fontSize: DS.font.md,
+    fontWeight: '800',
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
 });

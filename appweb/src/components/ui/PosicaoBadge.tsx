@@ -1,99 +1,50 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Posicao, POSICOES, POSICAO_COLORS, DS } from '@/constants/design';
 
-export type Posicao =
-  | 'Goleiro'
-  | 'Zagueiro'
-  | 'Lateral Direito'
-  | 'Lateral Esquerdo'
-  | 'Volante'
-  | 'Meia'
-  | 'Meia Atacante'
-  | 'Ponta Direita'
-  | 'Ponta Esquerda'
-  | 'Centroavante'
-  | 'Segundo Atacante';
+export type { Posicao };
+export { POSICOES };
 
-export const POSICOES: Posicao[] = [
-  'Goleiro',
-  'Zagueiro',
-  'Lateral Direito',
-  'Lateral Esquerdo',
-  'Volante',
-  'Meia',
-  'Meia Atacante',
-  'Ponta Direita',
-  'Ponta Esquerda',
-  'Centroavante',
-  'Segundo Atacante',
-];
-
-const POSICAO_COLORS: Record<Posicao, { bg: string; text: string }> = {
-  Goleiro: { bg: '#F57F17', text: '#FFFFFF' },
-  Zagueiro: { bg: '#1565C0', text: '#FFFFFF' },
-  'Lateral Direito': { bg: '#0277BD', text: '#FFFFFF' },
-  'Lateral Esquerdo': { bg: '#0277BD', text: '#FFFFFF' },
-  Volante: { bg: '#6A1B9A', text: '#FFFFFF' },
-  Meia: { bg: '#00695C', text: '#FFFFFF' },
-  'Meia Atacante': { bg: '#2E7D32', text: '#FFFFFF' },
-  'Ponta Direita': { bg: '#558B2F', text: '#FFFFFF' },
-  'Ponta Esquerda': { bg: '#558B2F', text: '#FFFFFF' },
-  Centroavante: { bg: '#B71C1C', text: '#FFFFFF' },
-  'Segundo Atacante': { bg: '#C62828', text: '#FFFFFF' },
-};
-
-// ─── Badge de exibição ────────────────────────────────────────────────────────
 interface PosicaoBadgeProps {
   posicao: Posicao;
   small?: boolean;
 }
 
 export function PosicaoBadge({ posicao, small = false }: PosicaoBadgeProps) {
-  const colors = POSICAO_COLORS[posicao];
+  const bg = POSICAO_COLORS[posicao];
   return (
-    <View
-      style={[
-        styles.badge,
-        { backgroundColor: colors.bg },
-        small && styles.badgeSmall,
-      ]}
-    >
-      <Text style={[styles.badgeText, small && styles.badgeTextSmall, { color: colors.text }]}>
+    <View style={[styles.badge, { backgroundColor: bg + '33', borderColor: bg }, small && styles.badgeSm]}>
+      <Text style={[styles.badgeText, { color: bg }, small && styles.badgeTextSm]}>
         {posicao}
       </Text>
     </View>
   );
 }
 
-// ─── Seletor de posição (interativo) ─────────────────────────────────────────
 interface PosicaoSelectorProps {
   value: Posicao | null;
-  onChange: (pos: Posicao) => void;
+  onChange: (p: Posicao) => void;
 }
 
 export function PosicaoSelector({ value, onChange }: PosicaoSelectorProps) {
   return (
-    <View style={styles.selectorContainer}>
+    <View style={styles.grid}>
       {POSICOES.map((pos) => {
         const selected = value === pos;
-        const colors = POSICAO_COLORS[pos];
+        const color = POSICAO_COLORS[pos];
         return (
           <Pressable
             key={pos}
             onPress={() => onChange(pos)}
-            style={[
-              styles.selectorBadge,
+            style={({ pressed }) => [
+              styles.chip,
               {
-                backgroundColor: selected ? colors.bg : 'transparent',
-                borderColor: colors.bg,
+                backgroundColor: selected ? color : color + '15',
+                borderColor: selected ? color : color + '55',
               },
+              pressed && { transform: [{ scale: 0.96 }] },
             ]}
           >
-            <Text
-              style={[
-                styles.selectorText,
-                { color: selected ? '#FFFFFF' : colors.bg },
-              ]}
-            >
+            <Text style={[styles.chipText, { color: selected ? '#FFFFFF' : color }]}>
               {pos}
             </Text>
           </Pressable>
@@ -105,35 +56,36 @@ export function PosicaoSelector({ value, onChange }: PosicaoSelectorProps) {
 
 const styles = StyleSheet.create({
   badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: DS.radius.full,
+    borderWidth: 1,
     alignSelf: 'flex-start',
   },
-  badgeSmall: {
+  badgeSm: {
     paddingHorizontal: 7,
     paddingVertical: 2,
   },
   badgeText: {
-    fontSize: 13,
+    fontSize: DS.font.sm,
     fontWeight: '700',
   },
-  badgeTextSmall: {
-    fontSize: 11,
+  badgeTextSm: {
+    fontSize: DS.font.xs,
   },
-  selectorContainer: {
+  grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
   },
-  selectorBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 2,
+  chip: {
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+    borderRadius: DS.radius.full,
+    borderWidth: 1.5,
   },
-  selectorText: {
-    fontSize: 13,
+  chipText: {
+    fontSize: DS.font.sm,
     fontWeight: '700',
   },
 });
