@@ -14,7 +14,7 @@ import { sortearTimes, ResultadoSorteio, JogadorSimples } from '@/utils/sortearT
 import { DS } from '@/constants/design';
 import { PartidaScreen } from '@/components/PartidaScreen';
 
-type Etapa = 'config' | 'resultado';
+type Etapa = 'config' | 'resultado' | 'selecaoTimes' | 'partida';
 
 export default function SorteioScreen() {
   const router = useRouter();
@@ -27,6 +27,7 @@ export default function SorteioScreen() {
   const [selecionados, setSelecionados] = useState<Set<string>>(
     () => new Set(jogadores.map((j) => j.id))
   );
+  const [timesParaPartida, setTimesParaPartida] = useState<Set<number>>(new Set());
   const [partidaVisible, setPartidaVisible] = useState(false);
 
   const opacity = useRef(new Animated.Value(0)).current;
@@ -77,86 +78,116 @@ export default function SorteioScreen() {
     setResultado(sortearTimes(simples, numTimes));
   }
 
+  function toggleTime(idx: number) {
+    setTimesParaPartida((prev) => {
+      const next = new Set(prev);
+      next.has(idx) ? next.delete(idx) : next.add(idx);
+      return next;
+    });
+  }
+
+  function confirmarSelecaoTimes() {
+    if (timesParaPartida.size < 2) {
+      Alert.alert('Seleção inválida', 'Selecione pelo menos 2 times para jogar.');
+      return;
+    }
+    navigate(() => {
+      setPartidaVisible(true);
+    });
+  }
+
   // ── Tela de Resultado ─────────────────────────────────────────────────────
   if (etapa === 'resultado' && resultado) {
-    const timesParaPartida = resultado.times.map((t) => ({ label: t.label, cor: t.cor }));
+    const timesParaPartida_ = resultado.times.map((t) => ({ label: t.label, cor: t.cor }));
+
+    // Se estamos na tela de seleção de times
+    if (timesParaPartida.size === 0 || !partidaVisible) {
+      return (
+        <SafeAreaView style={styles.safe}>
+          <View style={styles.header}>
+            <Pressable onPress={() => setEtapa('config')} style={styles.backBtn}>
+              <Text style={styles.backArrow}>‹</Text>
+              <Text style={styles.backText}>Configurar</Text>
+            </Pressable>
+            <Text style={styles.title}>Quais times irão jogar?</Text>
+          </View>
+
+          <ScrollView contentContainerStyle={styles.resultContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.selecaoInfo}>
+              <Text style={styles.selecaoEmoji}>🏟️</Text>
+              <Text style={styles.selecaoLabel}>Selecione de 2 a {resultado.times.length} times</Text>
+            </View>
+
+            {resultado.times.map((time, idx) => (
+              <Pressable
+                key={time.label}
+                onPress={() => toggleTime(idx)}
+                style={[styles.timeSelectCard, timesParaPartida.has(idx) && { borderColor: time.cor }]}
+              >
+                {/* Header colorido */}
+                <View style={[styles.timeSelectHeader, { backgroundColor: time.cor }]}>
+                  <View style={styles.timeSelectCheckbox}>
+                    {timesParaPartida.has(idx) && (
+                      <Text style={styles.timeSelectCheck}>✓</Text>
+                    )}
+                  </View>
+                  <Text style={styles.timeSelectLabel}>{time.label}</Text>
+                  <View style={styles.timeForcaBox}>
+                    <Text style={styles.timeForcaLabel}>força</Text>
+                    <View style={styles.timeForcaRow}>
+                      <StarRating value={Math.round(time.forca)} size={13} />
+                      <Text style={styles.timeForcaNum}>{time.forca.toFixed(1)}</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Jogadores */}
+                {time.jogadores.map((j, jidx) => (
+                  <View key={j.id} style={[styles.jogRow, jidx > 0 && styles.jogDivider]}>
+                    <View style={styles.jogInfo}>
+                      <Text style={styles.jogNome}>{j.nome}</Text>
+                      <PosicaoBadge posicao={j.posicao as Posicao} small />
+                    </View>
+                    <StarRating value={j.nota} size={13} />
+                  </View>
+                ))}
+              </Pressable>
+            ))}
+
+            <View style={{ height: 8 }} />
+          </ScrollView>
+
+          <View style={styles.footer}>
+            <CustomButton
+              label={`Iniciar com ${timesParaPartida.size} time${timesParaPartida.size !== 1 ? 's' : ''}`}
+              icon="⚽"
+              onPress={confirmarSelecaoTimes}
+              variant={timesParaPartida.size >= 2 ? 'primary' : 'ghost'}
+            />
+            <CustomButton label="Novo Sorteio" icon="🔀" onPress={sortearNovamente} variant="secondary" />
+            <CustomButton label="Início" icon="🏠" onPress={() => navigate(() => router.back())} variant="ghost" />
+          </View>
+        </SafeAreaView>
+      );
+    }
+
+    // Tela de partida
+    const timesSelect = Array.from(timesParaPartida)
+      .sort((a, b) => a - b)
+      .map((idx) => resultado.times[idx])
+      .map((t) => ({ label: t.label, cor: t.cor }));
 
     return (
       <SafeAreaView style={styles.safe}>
         {/* Tela de placar/cronômetro */}
         <PartidaScreen
-          times={timesParaPartida}
+          times={timesSelect}
           visible={partidaVisible}
-          onClose={() => setPartidaVisible(false)}
+          onClose={() => {
+            setPartidaVisible(false);
+            setTimesParaPartida(new Set());
+          }}
         />
-
-        <View style={styles.header}>
-          <Pressable onPress={() => setEtapa('config')} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
-            <Text style={styles.backText}>Configurar</Text>
-          </Pressable>
-          <Text style={styles.title}>Times Sorteados</Text>
-        </View>
-
-        <ScrollView contentContainerStyle={styles.resultContent} showsVerticalScrollIndicator={false}>
-
-          {resultado.times.map((time) => (
-            <View key={time.label} style={[styles.timeCard, { borderColor: time.cor + '80' }]}>
-              {/* Header colorido */}
-              <View style={[styles.timeHeader, { backgroundColor: time.cor }]}>
-                <Text style={styles.timeLabel}>{time.label}</Text>
-                <View style={styles.timeForcaBox}>
-                  <Text style={styles.timeForcaLabel}>força</Text>
-                  <View style={styles.timeForcaRow}>
-                    <StarRating value={Math.round(time.forca)} size={13} />
-                    <Text style={styles.timeForcaNum}>{time.forca.toFixed(1)}</Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* Jogadores */}
-              {time.jogadores.map((j, idx) => (
-                <View key={j.id} style={[styles.jogRow, idx > 0 && styles.jogDivider]}>
-                  <View style={styles.jogInfo}>
-                    <Text style={styles.jogNome}>{j.nome}</Text>
-                    <PosicaoBadge posicao={j.posicao as Posicao} small />
-                  </View>
-                  <StarRating value={j.nota} size={13} />
-                </View>
-              ))}
-            </View>
-          ))}
-
-          {/* Linha (reservas) */}
-          {resultado.linha.length > 0 && (
-            <View style={styles.linhaCard}>
-              <View style={styles.linhaHeader}>
-                <Text style={styles.linhaEmoji}>🪑</Text>
-                <View>
-                  <Text style={styles.linhaTitle}>Na Linha</Text>
-                  <Text style={styles.linhaSub}>Entra quando alguém sair</Text>
-                </View>
-              </View>
-              {resultado.linha.map((j, idx) => (
-                <View key={j.id} style={[styles.jogRow, idx > 0 && styles.jogDivider]}>
-                  <View style={styles.jogInfo}>
-                    <Text style={styles.jogNome}>{j.nome}</Text>
-                    <PosicaoBadge posicao={j.posicao as Posicao} small />
-                  </View>
-                  <StarRating value={j.nota} size={13} />
-                </View>
-              ))}
-            </View>
-          )}
-
-          <View style={{ height: 8 }} />
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <CustomButton label="Iniciar Partida" icon="🏁" onPress={() => setPartidaVisible(true)} variant="primary" />
-          <CustomButton label="Novo Sorteio" icon="🔀" onPress={sortearNovamente} variant="secondary" />
-          <CustomButton label="Início" icon="🏠" onPress={() => navigate(() => router.back())} variant="ghost" />
-        </View>
       </SafeAreaView>
     );
   }
@@ -358,4 +389,47 @@ const styles = StyleSheet.create({
   linhaEmoji: { fontSize: 26 },
   linhaTitle: { color: DS.color.orange, fontSize: DS.font.lg, fontWeight: '800' },
   linhaSub:   { color: DS.color.orange + '99', fontSize: DS.font.xs },
+
+  // Seleção de Times
+  selecaoInfo: {
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 20,
+    paddingHorizontal: 16,
+  },
+  selecaoEmoji: { fontSize: 48 },
+  selecaoLabel: { color: DS.color.textPrimary, fontSize: DS.font.md, fontWeight: '700', textAlign: 'center' },
+
+  timeSelectCard: {
+    borderRadius: DS.radius.lg,
+    borderWidth: 2,
+    borderColor: DS.color.border,
+    overflow: 'hidden',
+    backgroundColor: DS.color.surface,
+    marginBottom: 12,
+  },
+  timeSelectHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    justifyContent: 'space-between',
+  },
+  timeSelectCheckbox: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  timeSelectCheck: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  timeSelectLabel: { color: '#FFFFFF', fontSize: DS.font.xl, fontWeight: '900', letterSpacing: 0.5, flex: 1 },
 });
