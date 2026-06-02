@@ -12,6 +12,7 @@ import { PosicaoBadge, Posicao } from '@/components/ui/PosicaoBadge';
 import { useSplash } from '@/components/SplashTransition';
 import { sortearTimes, ResultadoSorteio, JogadorSimples } from '@/utils/sortearTimes';
 import { DS } from '@/constants/design';
+import { PartidaScreen } from '@/components/PartidaScreen';
 
 type Etapa = 'config' | 'resultado';
 
@@ -26,6 +27,7 @@ export default function SorteioScreen() {
   const [selecionados, setSelecionados] = useState<Set<string>>(
     () => new Set(jogadores.map((j) => j.id))
   );
+  const [partidaVisible, setPartidaVisible] = useState(false);
 
   const opacity = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -77,8 +79,17 @@ export default function SorteioScreen() {
 
   // ── Tela de Resultado ─────────────────────────────────────────────────────
   if (etapa === 'resultado' && resultado) {
+    const timesParaPartida = resultado.times.map((t) => ({ label: t.label, cor: t.cor }));
+
     return (
       <SafeAreaView style={styles.safe}>
+        {/* Tela de placar/cronômetro */}
+        <PartidaScreen
+          times={timesParaPartida}
+          visible={partidaVisible}
+          onClose={() => setPartidaVisible(false)}
+        />
+
         <View style={styles.header}>
           <Pressable onPress={() => setEtapa('config')} style={styles.backBtn}>
             <Text style={styles.backArrow}>‹</Text>
@@ -142,6 +153,7 @@ export default function SorteioScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
+          <CustomButton label="Iniciar Partida" icon="🏁" onPress={() => setPartidaVisible(true)} variant="primary" />
           <CustomButton label="Novo Sorteio" icon="🔀" onPress={sortearNovamente} variant="secondary" />
           <CustomButton label="Início" icon="🏠" onPress={() => navigate(() => router.back())} variant="ghost" />
         </View>

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Bora Rachar",
+    "name": "Bora Rachar!",
     "slug": "borarachar",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "icon": "./assets/favicons/apple-touch-icon.png",
     "android": {
       "icon": "./assets/favicons/android-chrome-512x512.png",
