@@ -12,7 +12,7 @@
       "package": "com.borarachar.app"
     },
     "web": {
-      "favicon": "./assets/favicons/favicon.ico"
+      "favicon": "./assets/favicons/favicon-32x32.png"
     },
     "extra": {
       "eas": {
