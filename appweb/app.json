@@ -1,51 +1,18 @@
 {
   "expo": {
-    "name": "borarachar",
+    "name": "Bora Rachar",
     "slug": "borarachar",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "borarachar",
-    "userInterfaceStyle": "automatic",
-    "ios": {
-      "icon": "./assets/expo.icon"
-    },
+    "icon": "./assets/favicons/apple-touch-icon.png",
     "android": {
+      "icon": "./assets/favicons/android-chrome-512x512.png",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/favicons/android-chrome-512x512.png",
+        "backgroundColor": "#060E06"
       },
-      "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.borarachar"
+      "package": "com.borarachar.app"
     },
     "web": {
-      "output": "static",
-      "favicon": "./assets/favicons/favicon-32x32.png"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "backgroundColor": "#208AEF",
-          "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
-          }
-        }
-      ]
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "04a1705d-55d2-4f91-b263-64087c57b7ec"
-      }
+      "favicon": "./assets/favicons/favicon.ico"
     }
   }
 }

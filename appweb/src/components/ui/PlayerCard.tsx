@@ -32,15 +32,15 @@ export function PlayerCard({ jogador, onPress }: PlayerCardProps) {
         <Text style={[styles.avatarText, { color: avatarColor }]}>{initial}</Text>
       </View>
 
-      {/* Info */}
+      {/* Info — nome + posição */}
       <View style={styles.info}>
         <Text style={styles.nome} numberOfLines={1}>{jogador.nome}</Text>
         <PosicaoBadge posicao={jogador.posicao} small />
       </View>
 
-      {/* Nota */}
+      {/* Nota — estrelas alinhadas à direita */}
       <View style={styles.notaBox}>
-        <StarRating value={jogador.nota} size={14} />
+        <StarRating value={jogador.nota} size={16} />
         <Text style={styles.notaNum}>{jogador.nota}/5</Text>
       </View>
 
@@ -55,8 +55,7 @@ const styles = StyleSheet.create({
     backgroundColor: DS.color.surface,
     borderRadius: DS.radius.md,
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    alignItems: 'center',  // tudo alinhado verticalmente ao centro
     borderWidth: 1,
     borderColor: DS.color.border,
     overflow: 'hidden',
@@ -78,6 +77,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1.5,
     flexShrink: 0,
+    marginLeft: 10,
   },
   avatarText: {
     fontSize: 18,
@@ -86,7 +86,8 @@ const styles = StyleSheet.create({
   info: {
     flex: 1,
     gap: 5,
-    paddingVertical: 12,
+    paddingVertical: 14,
+    paddingLeft: 10,
   },
   nome: {
     color: DS.color.textPrimary,
@@ -95,16 +96,19 @@ const styles = StyleSheet.create({
   },
   notaBox: {
     alignItems: 'flex-end',
-    gap: 2,
+    justifyContent: 'center',
+    gap: 3,
+    paddingRight: 4,
   },
   notaNum: {
     color: DS.color.textMuted,
     fontSize: DS.font.xs,
+    textAlign: 'right',
   },
   arrow: {
     color: DS.color.textMuted,
     fontSize: 22,
-    paddingRight: 12,
+    paddingHorizontal: 10,
     fontWeight: '300',
   },
 });
