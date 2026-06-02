@@ -1,44 +1,65 @@
-/**
- * JogadoresContext
- * Estado global dos jogadores. Por enquanto usa estado em memória com
- * dados de exemplo. O time de backend pode trocar as funções CRUD aqui
- * por chamadas ao banco sem alterar nenhuma tela.
- */
-
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Jogador } from '@/components/ui/PlayerCard';
 
-// ─── Dados de exemplo para visualizar as telas ────────────────────────────────
-const JOGADORES_INICIAIS: Jogador[] = [];
+const STORAGE_KEY = '@borarachar:jogadores';
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
 interface JogadoresContextData {
   jogadores: Jogador[];
-  adicionarJogador: (j: Omit<Jogador, 'id'>) => void;
-  editarJogador: (j: Jogador) => void;
-  excluirJogador: (id: string) => void;
+  carregando: boolean;
+  adicionarJogador: (j: Omit<Jogador, 'id'>) => Promise<void>;
+  editarJogador: (j: Jogador) => Promise<void>;
+  excluirJogador: (id: string) => Promise<void>;
   buscarJogador: (id: string) => Jogador | undefined;
 }
 
-// ─── Context ──────────────────────────────────────────────────────────────────
 const JogadoresContext = createContext<JogadoresContextData | null>(null);
 
 export function JogadoresProvider({ children }: { children: ReactNode }) {
-  const [jogadores, setJogadores] = useState<Jogador[]>(JOGADORES_INICIAIS);
+  const [jogadores, setJogadores] = useState<Jogador[]>([]);
+  const [carregando, setCarregando] = useState(true);
 
-  function adicionarJogador(dados: Omit<Jogador, 'id'>) {
+  // Carrega do storage ao iniciar
+  useEffect(() => {
+    async function carregar() {
+      try {
+        const json = await AsyncStorage.getItem(STORAGE_KEY);
+        if (json) setJogadores(JSON.parse(json));
+      } catch (e) {
+        console.error('Erro ao carregar jogadores:', e);
+      } finally {
+        setCarregando(false);
+      }
+    }
+    carregar();
+  }, []);
+
+  // Salva no storage sempre que a lista mudar
+  async function persistir(lista: Jogador[]) {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+    } catch (e) {
+      console.error('Erro ao salvar jogadores:', e);
+    }
+  }
+
+  async function adicionarJogador(dados: Omit<Jogador, 'id'>) {
     const novo: Jogador = { ...dados, id: Date.now().toString() };
-    setJogadores((prev) => [...prev, novo]);
+    const nova = [...jogadores, novo];
+    setJogadores(nova);
+    await persistir(nova);
   }
 
-  function editarJogador(atualizado: Jogador) {
-    setJogadores((prev) =>
-      prev.map((j) => (j.id === atualizado.id ? atualizado : j))
-    );
+  async function editarJogador(atualizado: Jogador) {
+    const nova = jogadores.map((j) => (j.id === atualizado.id ? atualizado : j));
+    setJogadores(nova);
+    await persistir(nova);
   }
 
-  function excluirJogador(id: string) {
-    setJogadores((prev) => prev.filter((j) => j.id !== id));
+  async function excluirJogador(id: string) {
+    const nova = jogadores.filter((j) => j.id !== id);
+    setJogadores(nova);
+    await persistir(nova);
   }
 
   function buscarJogador(id: string) {
@@ -47,7 +68,7 @@ export function JogadoresProvider({ children }: { children: ReactNode }) {
 
   return (
     <JogadoresContext.Provider
-      value={{ jogadores, adicionarJogador, editarJogador, excluirJogador, buscarJogador }}
+      value={{ jogadores, carregando, adicionarJogador, editarJogador, excluirJogador, buscarJogador }}
     >
       {children}
     </JogadoresContext.Provider>
@@ -56,6 +77,6 @@ export function JogadoresProvider({ children }: { children: ReactNode }) {
 
 export function useJogadores() {
   const ctx = useContext(JogadoresContext);
-  if (!ctx) throw new Error('useJogadores must be used within JogadoresProvider');
+  if (!ctx) throw new Error('useJogadores deve ser usado dentro de JogadoresProvider');
   return ctx;
 }

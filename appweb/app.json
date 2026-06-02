@@ -6,8 +6,7 @@
     "android": {
       "icon": "./assets/favicons/android-chrome-512x512.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/favicons/android-chrome-512x512.png",
-        "backgroundColor": "#060E06"
+        "foregroundImage": "./assets/favicons/android-chrome-512x512.png"
       },
       "package": "com.borarachar.app"
     },
