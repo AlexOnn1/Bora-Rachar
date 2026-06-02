@@ -2,6 +2,7 @@
   "expo": {
     "name": "Bora Rachar",
     "slug": "borarachar",
+    "version": "1.0.1",
     "icon": "./assets/favicons/apple-touch-icon.png",
     "android": {
       "icon": "./assets/favicons/android-chrome-512x512.png",
@@ -12,6 +13,11 @@
     },
     "web": {
       "favicon": "./assets/favicons/favicon.ico"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "04a1705d-55d2-4f91-b263-64087c57b7ec"
+      }
     }
   }
 }
