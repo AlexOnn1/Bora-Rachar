@@ -12,9 +12,10 @@ a partida com placar e cronômetro em tempo real.
 
 | Membro | Responsabilidade |
 |--------|-----------------|
-| Alex   | Front-End (React Native / Expo) |
-| [Nome] | Back-End / Banco de Dados |
-| [Nome] | Back-End / Banco de Dados |
+| Alexsander  | Front-End (React Native / Expo) / Tech Leader - Trello |
+| Fayrlysson  | Back-End / Banco de Dados |
+| Maria Clara | Design / Figma |
+| Saul & Davi | Documentação / testes |
 
 ---
 
