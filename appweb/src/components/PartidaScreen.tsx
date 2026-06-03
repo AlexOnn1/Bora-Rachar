@@ -105,62 +105,62 @@ function SetupModal({
   const [input, setInput] = useState('10');
   const presets = [5, 10, 15, 20, 30];
 
+  if (!visible) return null;
+
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <View style={styles.setupCard}>
-          {/* Title */}
-          <View style={styles.setupHeader}>
-            <Text style={styles.setupEmoji}>⏱️</Text>
-            <Text style={styles.setupTitle}>Duração da Partida</Text>
-            <Text style={styles.setupSub}>Quantos minutos terá o jogo?</Text>
-          </View>
-
-          {/* Quick presets */}
-          <View style={styles.presetRow}>
-            {presets.map((p) => (
-              <Pressable
-                key={p}
-                onPress={() => setInput(String(p))}
-                style={[
-                  styles.presetBtn,
-                  input === String(p) && styles.presetBtnOn,
-                ]}
-              >
-                <Text style={[styles.presetText, input === String(p) && styles.presetTextOn]}>
-                  {p}′
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          {/* Manual input */}
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.minuteInput}
-              value={input}
-              onChangeText={(v) => setInput(v.replace(/[^0-9]/g, ''))}
-              keyboardType="number-pad"
-              maxLength={3}
-              placeholderTextColor={DS.color.textMuted}
-              placeholder="00"
-            />
-            <Text style={styles.minuteLabel}>minutos</Text>
-          </View>
-
-          {/* Confirm */}
-          <Pressable
-            onPress={() => {
-              const mins = Math.max(1, Math.min(999, parseInt(input || '10', 10)));
-              onConfirm(mins);
-            }}
-            style={({ pressed }) => [styles.startMatchBtn, { opacity: pressed ? 0.85 : 1 }]}
-          >
-            <Text style={styles.startMatchText}>🏁  INICIAR PARTIDA</Text>
-          </Pressable>
+    <View style={styles.overlay}>
+      <View style={styles.setupCard}>
+        {/* Title */}
+        <View style={styles.setupHeader}>
+          <Text style={styles.setupEmoji}>⏱️</Text>
+          <Text style={styles.setupTitle}>Duração da Partida</Text>
+          <Text style={styles.setupSub}>Quantos minutos terá o jogo?</Text>
         </View>
+
+        {/* Quick presets */}
+        <View style={styles.presetRow}>
+          {presets.map((p) => (
+            <Pressable
+              key={p}
+              onPress={() => setInput(String(p))}
+              style={[
+                styles.presetBtn,
+                input === String(p) && styles.presetBtnOn,
+              ]}
+            >
+              <Text style={[styles.presetText, input === String(p) && styles.presetTextOn]}>
+                {p}′
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Manual input */}
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.minuteInput}
+            value={input}
+            onChangeText={(v) => setInput(v.replace(/[^0-9]/g, ''))}
+            keyboardType="number-pad"
+            maxLength={3}
+            placeholderTextColor={DS.color.textMuted}
+            placeholder="00"
+          />
+          <Text style={styles.minuteLabel}>minutos</Text>
+        </View>
+
+        {/* Confirm */}
+        <Pressable
+          onPress={() => {
+            const mins = Math.max(1, Math.min(999, parseInt(input || '10', 10)));
+            onConfirm(mins);
+          }}
+          style={({ pressed }) => [styles.startMatchBtn, { opacity: pressed ? 0.85 : 1 }]}
+        >
+          <Text style={styles.startMatchText}>🏁  INICIAR PARTIDA</Text>
+        </Pressable>
       </View>
-    </Modal>
+    </View>
   );
 }
 
@@ -502,11 +502,17 @@ const styles = StyleSheet.create({
 
   // ── Setup Modal ──
   overlay: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
+    zIndex: 10,
+    elevation: 20,
   },
   setupCard: {
     width: '100%',
